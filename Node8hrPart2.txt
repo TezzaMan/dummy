@@ -1,0 +1,230 @@
+https://www.youtube.com/watch?v=Oe421EPjeBE   Nodejs course 8 hrs
+
+johnsmilga.com   (all the code for the course is here, download as zip)
+
+node and express.js framework backend fullstack
+
+new app.js, looking at filesystem fs (2 flavours, synchronous blocking code. async non blocking code)
+
+syncronous method:
+
+const { readFileSync, writeFileSync } = require('fs')   (destructured for readFileSync from module fs)
+
+//const fs = require("fs");  (Same as above one line, but written differently)
+//fs.readFileSync;           (but in 2 lines, note readFileSync is a method, it requires 2 parameters)
+                             (it requires the path to the file and what encoding it uses eg utf8)
+
+
+const { readFileSync, writeFileSync } = require('fs')   (destructured for the 2 methods within {})
+const first = readFileSync('./content/first.txt', 'utf8')
+const second = readFileSync('./content/second.txt', 'utf8')
+console.log(first, second)
+
+will display Hello this is first text file Hello this is second text file
+
+so write code out again, and add code below:
+
+const { readFileSync, writeFileSync } = require("fs");
+const first = readFileSync("./content/first.txt", "utf8");
+const second = readFileSync("./content/second.txt", "utf8");
+
+writeFileSync(                    (2 parameters file to create and value we want to pass, can have options too)
+  './content/result-sync.txt',    (ignore {flag: "a"} option for now, dont write in code below)
+  `Here is the result : ${first}, ${second}`, (on saving result-sync.txt is created, check what the file contains)
+  { flag: 'a' }                               (3rd value is an option which is an object with property name of flag)
+)                                             (if flag set to "a" then node will append the file, ie add a file/s to the end)
+
+
+
+
+
+asyncronous method:
+
+with the syncronous method you need to provide a callback, we run the callback when we are done
+ie when our functionality is complete we then run the callback, like addEventListener on a button
+which would be the click event and then pass in the callback function, and the callback function 
+will run every time we click on the button
+
+const { readFile, writeFile } = require('fs')
+
+console.log('start')
+readFile('./content/first.txt', 'utf8', (err, result) => {
+  if (err) {
+    console.log(err)
+    return
+  }
+  const first = result
+  readFile('./content/second.txt', 'utf8', (err, result) => {
+    if (err) {
+      console.log(err)
+      return
+    }
+    const second = result
+    writeFile(
+      './content/result-async.txt',
+      `Here is the result : ${first}, ${second}`,
+      (err, result) => {
+        if (err) {
+          console.log(err)
+          return
+        }
+        console.log('done with this task')
+      }
+    )
+  })
+})
+console.log('starting next task')
+
+
+The above is nested callbacks and coding can get messy, so alternatives are using promises and async await
+async await will be used as its easier
+
+
+Now HTTP: (using http here to demonstate something, will cover http in more detail later)
+(server setup is aka http module, a large part of this course is setting up a server and api)
+(along with the external express module, express is a package built on top of http)
+
+Simple and crude server:
+
+type the following in app.js
+
+const http = require("http");
+console.log(req);
+const server = http.createServer((req, res) => {   (createServer method is looking for a callback, where we)
+  res.write("Welcome to tezza's served page");     (have 2 parameters req and res which are objects, and since)
+  res.end();                                       (they are parameters we can call them what we want)
+})                                                 (req and res is common practice)
+server.listen(5000);                               (server listening on port 5000 , could of chose something else)
+
+save app.js and type node app.js in terminal, will show a small rectangular box, meaning server is
+ready and waiting, ie listening for requests (req)
+
+type localhost:5000 into browser search box at top and press enter to show what the server is displaying
+in this case just Welcome to tezza's served page
+
+req (request) has a lot of properties,and we want to show the property that gets us the URL (for react or dom we
+use forward slash / for home)
+
+endpoint is the address the client is requesting ?
+
+
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+    if (req.url === '/') {                      (if request url equals homepage ie / respond with "Welcome ...")
+  res.end('Welcome to our home page')
+  }
+  if (req.url === '/about') {
+  res.end('Here is our short history')
+  }
+  res.end(`
+  <h1>Oops!</h1>
+  <p>We can't seem to find the page you are looking for</p>
+  <a href="/">back home</a>`);
+  });
+
+  IF YOU GET ERRORS WHILE USING ABOVE SETUP, (which I did!!)
+  SWITCH TO IF, ELSE IF, ELSE (BELOW)
+  WE COVER THE CAUSE, LATER IN EXPRESS TUTORIAL
+
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+  if (req.url === "/") {
+    res.end("Welcome to our home page");
+  } else if (req.url === "/about") {
+    res.end("Here is our short history");
+  } else {
+    res.end(`
+    <h1>Oops!</h1>
+    <p>We can't seem to find the page you are looking for</p>
+    <a href="/">back home</a>
+    `);
+  }
+});
+
+server.listen(5000);
+
+
+Now on NPM: node package manager. npm lets us do 3 things, reuse our own code in other
+projects, use code written by other developers, and to share our own solutions.
+React has its create react app package, which is hosted on npm!
+npm calls the reusable code a package, and a package is basically a folder with js code,
+another name for package is a dependency and a module. either of the 3 can be used as they 
+all mean the same thing!! There is no QA in the npm registry, anyone can publish anything!
+Look for packages with lots of weekly downloads. 
+
+npmjs.com give you access to the worlds biggest code store!! inc frameworks, libraries, and code.
+for example you need a slider in your app, search on the site
+
+npm comes with node.
+on npmjs site search for bootstrap
+we have access to npm global command
+see what version of npm you have npm -v or -version, mine is 9.6.2
+we can install a package as a local dependency which is only used in a particular projects
+with npm i packagename  (note i or install is the same thing)
+we can install a package with Global dependency which can be used in any projects
+with npm install -g packagename
+or may need sudo npm install -g packagename
+Most will be local dependencies, especially with the arrival of npx where there is less need for global
+
+there is one more thing to set up re dependencies.
+
+package.json is a manifest file (stores important info about the project/package)
+There are 3 ways in which we can create a package.json:
+1 we can use a manual approach to create package.json in the root and create properties etc
+2 npm init (step by step, press enter to skip)
+3 npm init -y (everything is set up as default)
+
+Use `npm install <pkg>` afterwards to install a package and
+save it as a dependency in the package.json file.
+
+(if eventually you decide to publish your package, the name has to be unique, 
+so check in npmjs.com for the name check of the package)
+
+type npm init in terminal, press enter for all and then finally type yes for is this ok?
+And there pops up package.json at root!!
+
+now delete it and type npm init -y
+
+will get same thing!
+
+now type npm i lodash (a utility library package, just to show that it has no other dependencies.
+note package.json now lists lodash as a dependency. Also a node_modules folder is created where all
+the dependencies are stored)
+
+now if we install bootstrap we get bootstrap as a dependency, but also jquery and poppers.js as 
+dependencies placed in node_modules, but package.json only lists bootstrap as a dependency.
+This is because bootstrap uses these dependencies. 
+
+Since the lodash package is external, and external packages need to be installed first, in app.js:
+
+const _ = require("lodash");
+
+const items = [1,[2,[3,[4]]]];  here items is an array of arrays, lodash has a flattenDeep method
+                                and will produce a flat array here
+const newItems = _.flattenDeep(items)
+console.log(newItems);        will display [1, 2, 3, 4]
+
+next why package.json is so crucial when sharing project with others
+will be using git hub and a few git commands for the example.
+Our task is to push our up to git hub without the node_modules
+
+create a dummy repo on git hub, go to github site, go to your repositories
+in drop down menu, top right of screen, little downward arrow.
+
+click on new, type in repo name (dummy) and press create repo. This page
+is where we have 3 options, we want the option with 3 commands
+Just click mouse on the 2 little boxes on the right to copy the commands
+
+…or push an existing repository from the command line
+git remote add origin https://github.com/TezzaMan/dummy.git
+git branch -M main
+git push -u origin main
+
+back in vscode create a new file called .gitignore at root and type
+the node_modules in this file, by typing:
+
+/node_modules    (now node_modules will not be pushed up to git)
+
+up to 2:00:03/8:16:47
